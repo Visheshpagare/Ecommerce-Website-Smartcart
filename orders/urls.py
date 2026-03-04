@@ -13,4 +13,10 @@ urlpatterns = [
     path('place-order/', views.place_order, name='place_order'),
     path('confirmation/<int:order_id>/', views.order_confirmation, name='order_confirmation'),
     path('detail/<int:order_id>/', views.order_detail, name='order_detail'),
+    
+    # Razorpay Payment URLs
+    path('payment/initiate/<int:order_id>/', views.initiate_payment, name='initiate_payment'),
+    path('payment/verify/', views.verify_payment, name='verify_payment'),
+    path('payment/success/<int:order_id>/', views.payment_success, name='payment_success'),
+    path('payment/failed/', views.payment_failed, name='payment_failed'),
 ]

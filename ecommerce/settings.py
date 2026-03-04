@@ -14,9 +14,9 @@ from pathlib import Path
 from dotenv import load_dotenv
 import os
 
-load_dotenv()
-
+# Load .env file from the project root (ecommerce folder)
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / '.env')
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-default-key')
 
@@ -129,3 +129,8 @@ LOGIN_REDIRECT_URL = '/'
 AUTH_USER_MODEL = 'users.CustomUser'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Razorpay Payment Gateway Configuration
+RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID')
+RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_KEY_SECRET')
+RAZORPAY_CURRENCY = 'INR'

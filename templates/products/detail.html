@@ -82,16 +82,19 @@
                 </div>
                 
                 <!-- Add to Cart -->
-                <form class="mt-6">
+                <div class="mt-6">
+                    <input type="hidden" name="quantity" value="1" id="qty-input">
                     <div class="flex items-center gap-4">
                         <div class="flex items-center border border-gray-300 rounded-lg">
                             <button type="button" class="qty-btn px-3 py-2 hover:bg-gray-100" data-action="decrease">-</button>
                             <input type="number" value="1" min="1" max="{{ product.stock }}" 
-                                   class="qty-input w-16 text-center border-x border-gray-300 py-2 focus:outline-none">
+                                   class="w-16 text-center border-x border-gray-300 py-2 focus:outline-none" id="qty-display">
                             <button type="button" class="qty-btn px-3 py-2 hover:bg-gray-100" data-action="increase">+</button>
                         </div>
-                        <button type="button" class="add-to-cart-btn flex-1 bg-primary text-white py-3 rounded-lg hover:bg-primary-dark transition font-medium" data-product-id="{{ product.id }}">
-                            Add to Cart
+                        <button type="button" onclick="addToCartDetail({{ product.id }})"
+                                class="add-to-cart-btn flex-1 bg-primary text-white py-3 rounded-lg hover:bg-primary-dark transition font-medium" 
+                                {% if product.stock == 0 %}disabled{% endif %}>
+                            {% if product.stock > 0 %}Add to Cart{% else %}Out of Stock{% endif %}
                         </button>
                         <button type="button" class="wishlist-btn p-3 border border-gray-300 rounded-lg hover:border-red-500 hover:text-red-500 transition" data-product-id="{{ product.id }}">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -99,7 +102,7 @@
                             </svg>
                         </button>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
     </div>
@@ -190,52 +193,72 @@
 
 {% block extra_js %}
 <script>
-    // Add to Cart functionality
+    // ── Quantity Controls ──────────────────────────────────────────────
+    const qtyDisplay = document.getElementById('qty-display');
+
+    document.querySelectorAll('.qty-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            let qty = parseInt(qtyDisplay.value) || 1;
+            const max = parseInt(qtyDisplay.max) || 99;
+            if (this.dataset.action === 'increase' && qty < max) qty++;
+            else if (this.dataset.action === 'decrease' && qty > 1) qty--;
+            qtyDisplay.value = qty;
+        });
+    });
+
+    // ── Add to Cart (AJAX) ─────────────────────────────────────────────
     document.querySelectorAll('.add-to-cart-btn').forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function () {
             const productId = this.dataset.productId;
-            const quantityInput = document.querySelector('.qty-input');
-            const quantity = quantityInput ? quantityInput.value : 1;
-            
+            const quantity = parseInt(qtyDisplay.value) || 1;
+
+            // Get CSRF token from the cookie or the hidden input rendered by {% csrf_token %}
+            const csrfToken = document.cookie
+                .split('; ')
+                .find(row => row.startsWith('csrftoken='))
+                ?.split('=')[1]
+                || document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            // Visual feedback
+            const originalText = this.textContent;
+            this.disabled = true;
+            this.textContent = 'Adding...';
+
             fetch(`/orders/cart/add/${productId}/`, {
                 method: 'POST',
                 headers: {
-                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-CSRFToken': csrfToken,
                     'X-Requested-With': 'XMLHttpRequest',
                     'Content-Type': 'application/x-www-form-urlencoded'
                 },
                 body: `quantity=${quantity}`
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
-                    // Update cart count in navbar
+                    // Update cart badge in navbar
                     const cartBadge = document.getElementById('cart-count-badge');
                     if (cartBadge) {
                         cartBadge.textContent = data.cart_count;
                         cartBadge.style.display = 'flex';
                     }
                     showToast(data.message || 'Added to cart!', 'success');
+                } else {
+                    showToast(data.message || 'Could not add to cart.', 'error');
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                showToast('Failed to add to cart', 'error');
+                console.error('Add to cart error:', error);
+                showToast('Something went wrong. Please try again.', 'error');
+            })
+            .finally(() => {
+                this.disabled = false;
+                this.textContent = originalText;
             });
         });
     });
-    
-    // Quantity controls
-    const qtyInput = document.querySelector('.qty-input');
-    if (qtyInput) {
-        document.querySelectorAll('.qty-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                let qty = parseInt(qtyInput.value);
-                if (this.dataset.action === 'increase') qty++;
-                else if (this.dataset.action === 'decrease' && qty > 1) qty--;
-                qtyInput.value = qty;
-            });
-        });
-    }
 </script>
 {% endblock %}

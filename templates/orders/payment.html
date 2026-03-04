@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block title %}Payment - Ecommerce{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 py-8">
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <h1 class="text-2xl font-bold mb-6">Complete Your Payment</h1>
+        
+        <!-- Order Summary -->
+        <div class="bg-gray-50 rounded-lg p-4 mb-6">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-gray-600">Order ID</span>
+                <span class="font-medium">#{{ order.id }}</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-gray-600">Amount to Pay</span>
+                <span class="text-2xl font-bold text-primary">₹{{ order.total_price }}</span>
+            </div>
+        </div>
+
+        <!-- Shipping Details -->
+        <div class="mb-6">
+            <h3 class="font-semibold mb-2">Shipping Address</h3>
+            <p class="text-gray-600 whitespace-pre-line">{{ order.shipping_address }}</p>
+        </div>
+
+        <!-- Pay Button -->
+        <button id="pay-btn" class="w-full bg-primary text-white py-3 rounded-lg hover:bg-primary-dark transition font-medium">
+            Pay Now with Razorpay
+        </button>
+
+        <!-- Security Note -->
+        <p class="text-center text-gray-500 text-sm mt-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            Secure payment powered by Razorpay
+        </p>
+    </div>
+</div>
+
+<!-- Razorpay Checkout Script -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script>
+    // Razorpay payment options
+    var options = {
+        "key": "{{ razorpay_merchant_key }}",
+        "amount": "{{ razorpay_amount }}",
+        "currency": "{{ currency }}",
+        "name": "SmartCart",
+        "description": "Order Payment - #{{ order.id }}",
+        "order_id": "{{ razorpay_order_id }}",
+        "prefill": {
+            "name": "{{ user.get_full_name|default:user.username }}",
+            "email": "{{ user.email }}",
+        },
+        "theme": {
+            "color": "#6366f1"
+        },
+        "handler": function (response) {
+            // This handler is called when payment is successful
+            // Send payment details to backend for verification
+            var formData = new FormData();
+            formData.append('razorpay_payment_id', response.razorpay_payment_id);
+            formData.append('razorpay_order_id', response.razorpay_order_id);
+            formData.append('razorpay_signature', response.razorpay_signature);
+            
+            fetch('{% url "orders:verify_payment" %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCsrfToken(),
+                },
+                body: formData
+            })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    // Redirect to success page
+                    window.location.href = data.redirect_url;
+                } else {
+                    // Redirect to failure page
+                    alert('Payment verification failed: ' + data.message);
+                    window.location.href = '{% url "orders:payment_failed" %}';
+                }
+            })
+            .catch(function(error) {
+                console.error('Error:', error);
+                alert('Payment verification failed. Please contact support.');
+                window.location.href = '{% url "orders:payment_failed" %}';
+            });
+        }
+    };
+
+    // Initialize Razorpay checkout
+    var rzp1 = new Razorpay(options);
+
+    // Event listener for payment button
+    document.getElementById('pay-btn').addEventListener('click', function(e) {
+        e.preventDefault();
+        rzp1.open();
+    });
+
+    // Handle payment failure
+    rzp1.on('payment.failed', function(response) {
+        alert('Payment failed: ' + response.error.description);
+        window.location.href = '{% url "orders:payment_failed" %}';
+    });
+
+    function getCsrfToken() {
+        var name = 'csrftoken';
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock %}

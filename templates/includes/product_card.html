@@ -41,8 +41,120 @@
             </div>
         </div>
         
-        <button class="add-to-cart-btn w-full mt-2 sm:mt-3 bg-primary text-white py-2 rounded-lg hover:bg-primary-dark transition opacity-100 sm:opacity-0 sm:group-hover:opacity-100 text-sm" data-product-id="{{ product.id }}">
+        <!-- Add to Cart Button -->
+        <button type="button" onclick="addToCart({{ product.id }})" class="add-to-cart-btn w-full mt-2 sm:mt-3 bg-primary text-white py-2 rounded-lg hover:bg-primary-dark transition opacity-100 sm:opacity-0 sm:group-hover:opacity-100 text-sm">
             Add to Cart
         </button>
     </div>
 </div>
+
+<script>
+function getCsrfToken() {
+    var name = 'csrftoken';
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function showToast(message, type) {
+    var toast = document.createElement('div');
+    toast.className = 'px-6 py-3 rounded-lg shadow-lg mb-2 flex items-center gap-3';
+    
+    if (type === 'success') {
+        toast.classList.add('bg-green-500', 'text-white');
+    } else if (type === 'error') {
+        toast.classList.add('bg-red-500', 'text-white');
+    } else {
+        toast.classList.add('bg-blue-500', 'text-white');
+    }
+    
+    toast.innerHTML = '<span>' + message + '</span>';
+    
+    var container = document.getElementById('toast-container');
+    if (container) {
+        container.appendChild(toast);
+        setTimeout(function() {
+            toast.remove();
+        }, 3000);
+    }
+}
+
+function addToCart(productId) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/orders/cart/add/' + productId + '/', true);
+    xhr.setRequestHeader('X-CSRFToken', getCsrfToken());
+    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            var data = JSON.parse(xhr.responseText);
+            if (data.success) {
+                var cartBadge = document.getElementById('cart-count-badge');
+                if (cartBadge) {
+                    cartBadge.textContent = data.cart_count;
+                    cartBadge.style.display = 'flex';
+                }
+                showToast(data.message || 'Added to cart!', 'success');
+            }
+        }
+    };
+    
+    xhr.send('quantity=1');
+}
+
+function addToCartDetail(productId) {
+    var qtyInput = document.getElementById('qty-input');
+    var quantity = qtyInput ? parseInt(qtyInput.value) || 1 : 1;
+    
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/orders/cart/add/' + productId + '/', true);
+    xhr.setRequestHeader('X-CSRFToken', getCsrfToken());
+    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            var data = JSON.parse(xhr.responseText);
+            if (data.success) {
+                var cartBadge = document.getElementById('cart-count-badge');
+                if (cartBadge) {
+                    cartBadge.textContent = data.cart_count;
+                    cartBadge.style.display = 'flex';
+                }
+                showToast(data.message || 'Added to cart!', 'success');
+            }
+        }
+    };
+    
+    xhr.send('quantity=' + quantity);
+}
+
+// Cart remove item
+document.querySelectorAll('.remove-item').forEach(function(btn) {
+    btn.onclick = function() {
+        var itemId = this.getAttribute('data-item-id');
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/orders/cart/remove/' + itemId + '/', true);
+        xhr.setRequestHeader('X-CSRFToken', getCsrfToken());
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                location.reload();
+            }
+        };
+        
+        xhr.send();
+    };
+});
+</script>

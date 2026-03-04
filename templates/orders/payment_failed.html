@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Payment Failed - Ecommerce{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 py-8">
+    <div class="bg-white rounded-xl shadow-md p-8 text-center">
+        <!-- Failure Icon -->
+        <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </div>
+
+        <h1 class="text-2xl font-bold mb-2">Payment Failed!</h1>
+        <p class="text-gray-600 mb-6">Sorry, your payment could not be processed. Please try again.</p>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-3">
+            <a href="{% url 'orders:checkout' %}" class="flex-1 bg-primary text-white py-3 rounded-lg hover:bg-primary-dark transition font-medium text-center">
+                Try Again
+            </a>
+            <a href="{% url 'products:product_list' %}" class="flex-1 bg-gray-100 text-gray-700 py-3 rounded-lg hover:bg-gray-200 transition font-medium text-center">
+                Continue Shopping
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
