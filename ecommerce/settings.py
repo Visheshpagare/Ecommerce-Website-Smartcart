@@ -22,11 +22,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-default-key')
 
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = [
-     "localhost",
-    "127.0.0.1",
-    ".trycloudflare.com",
-]
+ALLOWED_HOSTS = ["*"]
 
 
 INSTALLED_APPS = [
