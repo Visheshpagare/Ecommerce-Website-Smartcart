@@ -1,0 +1,103 @@
+{% extends 'dashboard/base.html' %}
+
+{% block page_title %}Products{% endblock %}
+
+{% block title %}Products - Dashboard{% endblock %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <h2 class="text-xl font-semibold">All Products</h2>
+    <a href="{% url 'dashboard:product_add' %}" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition">
+        + Add Product
+    </a>
+</div>
+
+<div class="bg-white rounded-xl shadow-sm overflow-hidden">
+    <table class="w-full">
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Image</th>
+                <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Name</th>
+                <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Category</th>
+                <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Price</th>
+                <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Stock</th>
+                <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Status</th>
+                <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+            {% for product in products %}
+                <tr>
+                    <td class="px-6 py-4">
+                        {% if product.image %}
+                            <img src="{{ product.image.url }}" class="w-12 h-12 rounded object-cover">
+                        {% else %}
+                            <div class="w-12 h-12 bg-gray-200 rounded flex items-center justify-center">
+                                <span class="text-gray-500">📦</span>
+                            </div>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4">
+                        <a href="{{ product.get_absolute_url }}" target="_blank" class="font-medium hover:text-primary">
+                            {{ product.name }}
+                        </a>
+                    </td>
+                    <td class="px-6 py-4">{{ product.category.name }}</td>
+                    <td class="px-6 py-4">
+                        {% if product.discount_price %}
+                            <span class="text-primary font-medium">₹{{ product.discount_price }}</span>
+                            <span class="text-gray-400 line-through text-sm ml-1">₹{{ product.price }}</span>
+                        {% else %}
+                            ₹{{ product.price }}
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="{% if product.stock < 10 %}text-red-600 font-medium{% endif %}">
+                            {{ product.stock }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <button class="toggle-status" data-id="{{ product.id }}" data-status="{{ product.is_active|yesno:'true,false' }}">
+                            <span class="px-2 py-1 text-xs rounded-full {% if product.is_active %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ product.is_active|yesno:"Active,Inactive" }}
+                            </span>
+                        </button>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <a href="{% url 'dashboard:product_edit' product.id %}" class="text-blue-600 hover:text-blue-800">Edit</a>
+                            <a href="{% url 'dashboard:product_delete' product.id %}" class="text-red-600 hover:text-red-800" onclick="return confirm('Are you sure?')">Delete</a>
+                        </div>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="7" class="px-6 py-8 text-center text-gray-500">No products yet</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.querySelectorAll('.toggle-status').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const id = this.dataset.id;
+            fetch(`/dashboard/products/${id}/toggle/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

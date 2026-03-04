@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Dashboard - Ecommerce{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6366f1',
+                        'primary-dark': '#4f46e5',
+                        sidebar: '#0f172a',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="bg-sidebar text-white w-64 flex-shrink-0 hidden lg:flex flex-col">
+            <div class="p-6">
+                <a href="{% url 'dashboard:home' %}" class="text-2xl font-bold">Admin Panel</a>
+            </div>
+            
+            <nav class="flex-1 px-4 space-y-2">
+                <a href="{% url 'dashboard:home' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'home' %}bg-primary text-white{% else %}text-gray-300 hover:bg-gray-800{% endif %} transition">
+                    <span>🏠</span> Overview
+                </a>
+                <a href="{% url 'dashboard:product_list' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg {% if 'product' in request.resolver_match.url_name %}bg-primary text-white{% else %}text-gray-300 hover:bg-gray-800{% endif %} transition">
+                    <span>📦</span> Products
+                </a>
+                <a href="{% url 'dashboard:order_list' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg {% if 'order' in request.resolver_match.url_name and 'order_status' not in request.resolver_match.url_name %}bg-primary text-white{% else %}text-gray-300 hover:bg-gray-800{% endif %} transition">
+                    <span>🛒</span> Orders
+                </a>
+                <a href="{% url 'dashboard:user_list' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg {% if 'user' in request.resolver_match.url_name %}bg-primary text-white{% else %}text-gray-300 hover:bg-gray-800{% endif %} transition">
+                    <span>👥</span> Users
+                </a>
+                <a href="{% url 'dashboard:category_list' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg {% if 'category' in request.resolver_match.url_name %}bg-primary text-white{% else %}text-gray-300 hover:bg-gray-800{% endif %} transition">
+                    <span>🏷️</span> Categories
+                </a>
+                <a href="{% url 'dashboard:coupon_list' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg {% if 'coupon' in request.resolver_match.url_name %}bg-primary text-white{% else %}text-gray-300 hover:bg-gray-800{% endif %} transition">
+                    <span>🎟️</span> Coupons
+                </a>
+            </nav>
+            
+            <div class="p-4 border-t border-gray-700">
+                <a href="{% url 'products:home' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800 transition">
+                    <span>←</span> Back to Store
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Topbar -->
+            <header class="bg-white shadow-sm h-16 flex items-center justify-between px-6">
+                <div class="flex items-center gap-4">
+                    <button id="mobile-menu-btn" class="lg:hidden p-2 text-gray-600 hover:text-gray-900">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                    <h1 class="text-xl font-semibold text-gray-800">{% block page_title %}Dashboard{% endblock %}</h1>
+                </div>
+                
+                <div class="flex items-center gap-4">
+                    <span class="text-gray-600">{{ request.user.username }}</span>
+                    <a href="{% url 'users:logout' %}" class="text-sm text-red-600 hover:text-red-800">Logout</a>
+                </div>
+            </header>
+
+            <!-- Content -->
+            <main class="flex-1 overflow-y-auto p-6">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="mb-4 p-4 rounded-lg {% if message.tags == 'success' %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+
+    <!-- Mobile Sidebar -->
+    <div id="mobile-sidebar" class="fixed inset-0 bg-sidebar z-50 hidden">
+        <div class="flex justify-end p-4">
+            <button id="close-sidebar" class="text-white p-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        <nav class="px-4 space-y-2">
+            <a href="{% url 'dashboard:home' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800 {% if request.resolver_match.url_name == 'home' %}bg-primary text-white{% endif %}">
+                <span>🏠</span> Overview
+            </a>
+            <a href="{% url 'dashboard:product_list' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800 {% if 'product' in request.resolver_match.url_name %}bg-primary text-white{% endif %}">
+                <span>📦</span> Products
+            </a>
+            <a href="{% url 'dashboard:order_list' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800 {% if 'order' in request.resolver_match.url_name %}bg-primary text-white{% endif %}">
+                <span>🛒</span> Orders
+            </a>
+            <a href="{% url 'dashboard:user_list' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800 {% if 'user' in request.resolver_match.url_name %}bg-primary text-white{% endif %}">
+                <span>👥</span> Users
+            </a>
+            <a href="{% url 'dashboard:category_list' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800 {% if 'category' in request.resolver_match.url_name %}bg-primary text-white{% endif %}">
+                <span>🏷️</span> Categories
+            </a>
+            <a href="{% url 'dashboard:coupon_list' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800 {% if 'coupon' in request.resolver_match.url_name %}bg-primary text-white{% endif %}">
+                <span>🎟️</span> Coupons
+            </a>
+        </nav>
+    </div>
+
+    <script>
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileSidebar = document.getElementById('mobile-sidebar');
+        const closeSidebar = document.getElementById('close-sidebar');
+        
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileSidebar.classList.remove('hidden');
+        });
+        
+        closeSidebar.addEventListener('click', () => {
+            mobileSidebar.classList.add('hidden');
+        });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

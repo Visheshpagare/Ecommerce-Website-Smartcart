@@ -1,0 +1,36 @@
+{% extends 'dashboard/base.html' %}
+
+{% block page_title %}{% if category %}Edit{% else %}Add{% endif %} Category{% endblock %}
+
+{% block title %}{% if category %}Edit{% else %}Add{% endif %} Category - Dashboard{% endblock %}
+
+{% block content %}
+<div class="max-w-md">
+    <h2 class="text-xl font-semibold mb-6">{% if category %}Edit{% else %}Add{% endif %} Category</h2>
+    
+    <form method="post" class="bg-white rounded-xl shadow-sm p-6 space-y-4">
+        {% csrf_token %}
+        
+        <div>
+            <label class="block text-sm font-medium mb-2">Name *</label>
+            <input type="text" name="name" value="{{ category.name|default:'' }}" required
+                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary">
+        </div>
+        
+        <div>
+            <label class="block text-sm font-medium mb-2">Slug *</label>
+            <input type="text" name="slug" value="{{ category.slug|default:'' }}" required
+                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary">
+        </div>
+        
+        <div class="flex gap-4 pt-4">
+            <button type="submit" class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary-dark transition">
+                {% if category %}Update{% else %}Create{% endif %}
+            </button>
+            <a href="{% url 'dashboard:category_list' %}" class="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

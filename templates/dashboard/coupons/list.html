@@ -1,0 +1,76 @@
+{% extends 'dashboard/base.html' %}
+
+{% block page_title %}Coupons{% endblock %}
+
+{% block title %}Coupons - Dashboard{% endblock %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <h2 class="text-xl font-semibold">All Coupons</h2>
+    <a href="{% url 'dashboard:coupon_add' %}" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition">
+        + Add Coupon
+    </a>
+</div>
+
+<div class="bg-white rounded-xl shadow-sm overflow-hidden">
+    <table class="w-full">
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Code</th>
+                <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Discount</th>
+                <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Expiry</th>
+                <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Status</th>
+                <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+            {% for coupon in coupons %}
+                <tr>
+                    <td class="px-6 py-4 font-medium">{{ coupon.code }}</td>
+                    <td class="px-6 py-4">{{ coupon.discount_percent }}%</td>
+                    <td class="px-6 py-4">{{ coupon.expiry_date|date:"M d, Y" }}</td>
+                    <td class="px-6 py-4">
+                        <button class="toggle-coupon" data-id="{{ coupon.id }}">
+                            <span class="px-2 py-1 text-xs rounded-full {% if coupon.is_active %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ coupon.is_active|yesno:"Active,Inactive" }}
+                            </span>
+                        </button>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <a href="{% url 'dashboard:coupon_edit' coupon.id %}" class="text-blue-600 hover:text-blue-800">Edit</a>
+                            <a href="{% url 'dashboard:coupon_delete' coupon.id %}" class="text-red-600 hover:text-red-800" onclick="return confirm('Are you sure?')">Delete</a>
+                        </div>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5" class="px-6 py-8 text-center text-gray-500">No coupons yet</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.querySelectorAll('.toggle-coupon').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const id = this.dataset.id;
+            fetch(`/dashboard/coupons/${id}/toggle/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

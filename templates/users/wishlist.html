@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% block title %}Wishlist - Ecommerce{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 2rem 0;">
+
+    <!-- Header -->
+    <div style="margin-bottom: 2rem;">
+        <h1 style="font-size: 2rem; font-weight: 700; margin-bottom: 0.25rem;">
+            My Wishlist
+        </h1>
+        <p style="color: var(--gray-500); margin: 0;">
+            Items you saved for later
+        </p>
+    </div>
+
+    {% if products %}
+        <div class="product-grid" style="
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 1.5rem;
+        ">
+
+            {% for product in products %}
+            <div class="product-card" style="
+                background: #fff;
+                border-radius: 14px;
+                overflow: hidden;
+                box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+                transition: all 0.25s ease;
+                display: flex;
+                flex-direction: column;
+            " onmouseover="this.style.transform='translateY(-6px)';this.style.boxShadow='0 10px 28px rgba(0,0,0,0.12)';"
+               onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 14px rgba(0,0,0,0.06)';">
+
+                <!-- Image -->
+                <div style="height: 200px; background: var(--gray-100); overflow: hidden;">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}"
+                             alt="{{ product.name }}"
+                             style="width:100%; height:100%; object-fit:cover;">
+                    {% else %}
+                        <div style="
+                            height:100%;
+                            display:flex;
+                            align-items:center;
+                            justify-content:center;
+                            color: var(--gray-500);
+                            font-size: 0.9rem;
+                        ">
+                            No Image
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Body -->
+                <div style="
+                    padding: 1rem;
+                    display: flex;
+                    flex-direction: column;
+                    flex-grow: 1;
+                ">
+                    <h3 style="
+                        font-size: 1rem;
+                        font-weight: 600;
+                        margin-bottom: 0.5rem;
+                        line-height: 1.4;
+                    ">
+                        {{ product.name }}
+                    </h3>
+
+                    <p style="
+                        font-size: 1.1rem;
+                        font-weight: 700;
+                        color: var(--primary);
+                        margin-bottom: 0.75rem;
+                    ">
+                        ₹{{ product.final_price }}
+                    </p>
+
+                    <!-- Buttons -->
+                    <div style="margin-top: auto; display: flex; gap: 0.5rem;">
+                        <a href="{{ product.get_absolute_url }}"
+                           class="btn btn-primary"
+                           style="flex:1; padding:0.55rem 0.75rem; font-size:0.85rem;">
+                            View
+                        </a>
+
+                        <button class="btn btn-danger remove-wishlist"
+                                data-product-id="{{ product.id }}"
+                                style="flex:1; padding:0.55rem 0.75rem; font-size:0.85rem;">
+                            Remove
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+    {% else %}
+        <!-- Empty State -->
+        <div class="card" style="
+            text-align:center;
+            padding: 3rem 1rem;
+            border-radius: 14px;
+        ">
+            <h3 style="margin-bottom: 0.5rem;">Your wishlist is empty ❤️</h3>
+            <p style="color: var(--gray-500); margin-bottom: 1.25rem;">
+                Save products you like to see them here.
+            </p>
+            <a href="{% url 'products:product_list' %}" class="btn btn-primary">
+                Browse Products
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.querySelectorAll('.remove-wishlist').forEach(button => {
+    button.addEventListener('click', function () {
+        const productId = this.dataset.productId;
+        const card = this.closest('.product-card');
+
+        fetch(`/users/wishlist/toggle/${productId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (!data.in_wishlist) {
+                card.style.opacity = '0';
+                setTimeout(() => card.remove(), 200);
+            }
+        })
+        .catch(() => {
+            alert("Something went wrong. Please try again.");
+        });
+    });
+});
+</script>
+{% endblock %}

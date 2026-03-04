@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkout - Ecommerce{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <h1 class="text-2xl font-bold mb-6">Checkout</h1>
+    
+    <form method="POST" action="{% url 'orders:place_order' %}">
+        {% csrf_token %}
+        
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- Shipping Form -->
+            <div class="flex-1">
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <h2 class="text-lg font-bold mb-4">Shipping Information</h2>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Full Name</label>
+                            <input type="text" name="full_name" value="{{ user.get_full_name|default:user.username }}" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Email</label>
+                            <input type="email" name="email" value="{{ user.email }}" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Shipping Address *</label>
+                            <textarea name="shipping_address" rows="3" required
+                                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary">{{ user.address }}</textarea>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">City</label>
+                                <input type="text" value="{{ user.city }}" 
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Country</label>
+                                <input type="text" value="{{ user.country }}" 
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Order Summary -->
+            <div class="w-full lg:w-96">
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <h sticky top-242 class="text-lg font-bold mb-4">Order Summary</h2>
+                    
+                    <!-- Items -->
+                    <div class="space-y-4 mb-4 max-h-64 overflow-y-auto">
+                        {% for item in items %}
+                            <div class="flex items-center gap-3">
+                                {% if item.product.image %}
+                                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="w-12 h-12 object-cover rounded">
+                                {% else %}
+                                    <div class="w-12 h-12 bg-gray-200 rounded flex items-center justify-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                    </div>
+                                {% endif %}
+                                <div class="flex-1">
+                                    <p class="font-medium text-sm">{{ item.product.name }}</p>
+                                    <p class="text-gray-500 text-sm">Qty: {{ item.quantity }}</p>
+                                </div>
+                                <span class="font-medium">₹{{ item.total }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="border-t border-gray-200 pt-4 space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Subtotal</span>
+                            <span>₹{{ subtotal }}</span>
+                        </div>
+                        {% if coupon_discount > 0 %}
+                            <div class="flex justify-between text-green-600">
+                                <span>Discount</span>
+                                <span>-₹{{ coupon_discount }}</span>
+                            </div>
+                        {% endif %}
+                        <div class="flex justify-between text-lg font-bold pt-2 border-t border-gray-200">
+                            <span>Total</span>
+                            <span class="text-primary">₹{{ total }}</span>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="w-full mt-6 bg-primary text-white py-3 rounded-lg hover:bg-primary-dark transition font-medium">
+                        Place Order
+                    </button>
+                    
+                    <a href="{% url 'orders:cart' %}" class="block mt-3 text-center text-gray-600 hover:text-primary transition text-sm">
+                        Back to Cart
+                    </a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

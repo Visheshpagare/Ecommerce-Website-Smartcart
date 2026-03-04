@@ -1,0 +1,89 @@
+{% extends 'dashboard/base.html' %}
+
+{% block page_title %}{% if product %}Edit{% else %}Add{% endif %} Product{% endblock %}
+
+{% block title %}{% if product %}Edit{% else %}Add{% endif %} Product - Dashboard{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl">
+    <h2 class="text-xl font-semibold mb-6">{% if product %}Edit{% else %}Add{% endif %} Product</h2>
+    
+    <form method="post" enctype="multipart/form-data" class="bg-white rounded-xl shadow-sm p-6 space-y-4">
+        {% csrf_token %}
+        
+        <div>
+            <label class="block text-sm font-medium mb-2">Name *</label>
+            <input type="text" name="name" value="{{ product.name|default:'' }}" required
+                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary">
+        </div>
+        
+        <div>
+            <label class="block text-sm font-medium mb-2">Slug *</label>
+            <input type="text" name="slug" value="{{ product.slug|default:'' }}" required
+                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary">
+        </div>
+        
+        <div>
+            <label class="block text-sm font-medium mb-2">Description *</label>
+            <textarea name="description" rows="4" required
+                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary">{{ product.description|default:'' }}</textarea>
+        </div>
+        
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium mb-2">Price *</label>
+                <input type="number" name="price" step="0.01" value="{{ product.price|default:'' }}" required
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium mb-2">Discount Price</label>
+                <input type="number" name="discount_price" step="0.01" value="{{ product.discount_price|default:'' }}"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary">
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium mb-2">Stock *</label>
+                <input type="number" name="stock" value="{{ product.stock|default:'0' }}" required
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium mb-2">Category *</label>
+                <select name="category" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary">
+                    <option value="">Select Category</option>
+                    {% for cat in categories %}
+                        <option value="{{ cat.id }}" {% if product.category.id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        
+        <div>
+            <label class="block text-sm font-medium mb-2">Image</label>
+            <input type="file" name="image" accept="image/*"
+                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary">
+            {% if product.image %}
+                <img src="{{ product.image.url }}" class="mt-2 w-24 h-24 object-cover rounded">
+            {% endif %}
+        </div>
+        
+        <div class="flex items-center gap-2">
+            <input type="checkbox" name="is_active" id="is_active" {% if product.is_active or not product %}checked{% endif %}
+                   class="rounded border-gray-300 text-primary focus:ring-primary">
+            <label for="is_active">Active</label>
+        </div>
+        
+        <div class="flex gap-4 pt-4">
+            <button type="submit" class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary-dark transition">
+                {% if product %}Update{% else %}Create{% endif %} Product
+            </button>
+            <a href="{% url 'dashboard:product_list' %}" class="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

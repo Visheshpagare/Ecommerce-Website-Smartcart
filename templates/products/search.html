@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Search Results - Ecommerce{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <h1 class="text-2xl font-bold mb-2">Search Results</h1>
+    <p class="text-gray-600 mb-6">
+        {% if query %}
+            Showing results for "{{ query }}" ({{ page_obj.paginator.count }} products found)
+        {% else %}
+            Please enter a search term
+        {% endif %}
+    </p>
+    
+    {% if products %}
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {% for product in products %}
+                {% include 'includes/product_card.html' with product=product %}
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+            <div class="mt-8 flex justify-center">
+                <nav class="flex gap-2">
+                    {% if page_obj.has_previous %}
+                        <a href="?q={{ query }}&page=1" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">First</a>
+                        <a href="?q={{ query }}&page={{ page_obj.previous_page_number }}" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Previous</a>
+                    {% endif %}
+                    
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <span class="px-4 py-2 bg-primary text-white rounded-lg">{{ num }}</span>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <a href="?q={{ query }}&page={{ num }}" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">{{ num }}</a>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                        <a href="?q={{ query }}&page={{ page_obj.next_page_number }}" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Next</a>
+                        <a href="?q={{ query }}&page={{ page_obj.paginator.num_pages }}" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Last</a>
+                    {% endif %}
+                </nav>
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="bg-white rounded-xl shadow-md p-12 text-center">
+            <p class="text-gray-500 mb-4">No Result found</p>
+            <a href="{% url 'products:product_list' %}" class="text-primary hover:underline">Browse all products</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

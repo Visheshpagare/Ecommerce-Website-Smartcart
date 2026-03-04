@@ -1,0 +1,48 @@
+{% extends 'dashboard/base.html' %}
+
+{% block page_title %}{% if coupon %}Edit{% else %}Add{% endif %} Coupon{% endblock %}
+
+{% block title %}{% if coupon %}Edit{% else %}Add{% endif %} Coupon - Dashboard{% endblock %}
+
+{% block content %}
+<div class="max-w-md">
+    <h2 class="text-xl font-semibold mb-6">{% if coupon %}Edit{% else %}Add{% endif %} Coupon</h2>
+    
+    <form method="post" class="bg-white rounded-xl shadow-sm p-6 space-y-4">
+        {% csrf_token %}
+        
+        <div>
+            <label class="block text-sm font-medium mb-2">Code *</label>
+            <input type="text" name="code" value="{{ coupon.code|default:'' }}" required
+                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary">
+        </div>
+        
+        <div>
+            <label class="block text-sm font-medium mb-2">Discount Percent *</label>
+            <input type="number" name="discount_percent" step="0.01" value="{{ coupon.discount_percent|default:'' }}" required
+                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary">
+        </div>
+        
+        <div>
+            <label class="block text-sm font-medium mb-2">Expiry Date *</label>
+            <input type="datetime-local" name="expiry_date" value="{{ coupon.expiry_date|date:'Y-m-d\TH:i' }}" required
+                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary">
+        </div>
+        
+        <div class="flex items-center gap-2">
+            <input type="checkbox" name="is_active" id="is_active" {% if coupon.is_active or not coupon %}checked{% endif %}
+                   class="rounded border-gray-300 text-primary focus:ring-primary">
+            <label for="is_active">Active</label>
+        </div>
+        
+        <div class="flex gap-4 pt-4">
+            <button type="submit" class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary-dark transition">
+                {% if coupon %}Update{% else %}Create{% endif %}
+            </button>
+            <a href="{% url 'dashboard:coupon_list' %}" class="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

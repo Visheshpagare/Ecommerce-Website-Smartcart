@@ -1,0 +1,84 @@
+{% extends 'dashboard/base.html' %}
+
+{% block page_title %}{{ user.username }}{% endblock %}
+
+{% block title %}{{ user.username }} - Dashboard{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-semibold">User: {{ user.username }}</h2>
+        <a href="{% url 'dashboard:user_list' %}" class="text-primary hover:underline">&larr; Back to Users</a>
+    </div>
+    
+    <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+        <h3 class="text-lg font-semibold mb-4">User Information</h3>
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <p class="text-sm text-gray-500">Username</p>
+                <p class="font-medium">{{ user.username }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500">Email</p>
+                <p class="font-medium">{{ user.email }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500">Full Name</p>
+                <p class="font-medium">{{ user.get_full_name|default:'-' }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500">Staff Status</p>
+                <span class="px-2 py-1 text-xs rounded-full {% if user.is_staff %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                    {{ user.is_staff|yesno:"Staff,User" }}
+                </span>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500">Date Joined</p>
+                <p class="font-medium">{{ user.date_joined|date:"M d, Y" }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500">Last Login</p>
+                <p class="font-medium">{{ user.last_login|date:"M d, Y H:i"|default:'Never' }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Order History -->
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-semibold">Order History</h3>
+        </div>
+        <table class="w-full">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Order ID</th>
+                    <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Total</th>
+                    <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Status</th>
+                    <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Date</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                {% for order in orders %}
+                    <tr>
+                        <td class="px-6 py-4">#{{ order.id }}</td>
+                        <td class="px-6 py-4 font-medium">₹{{ order.total_price }}</td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-1 text-xs rounded-full 
+                                {% if order.status == 'PENDING' %}bg-yellow-100 text-yellow-800
+                                {% elif order.status == 'DELIVERED' %}bg-green-100 text-green-800
+                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ order.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">{{ order.created_at|date:"M d, Y" }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4" class="px-6 py-8 text-center text-gray-500">No orders yet</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
