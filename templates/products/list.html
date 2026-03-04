@@ -57,7 +57,7 @@
     <div class="flex flex-col lg:flex-row gap-4 lg:gap-8">
         <!-- Sidebar Filters -->
         <aside class="w-full lg:w-64 flex-shrink-0 order-2 lg:order-1">
-            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-md p-4 md:p-6">
+            <div class="bg-white rounded-xl shadow-md p-4 md:p-6">
                 <h3 class="font-bold text-lg mb-4">Filters</h3>
                 
                 <!-- Categories -->
@@ -65,12 +65,12 @@
                     <h4 class="font-semibold mb-2">Categories</h4>
                     <div class="space-y-2">
                         <a href="{% url 'products:product_list' %}" 
-                           class="block {% if not current_category %}text-primary font-medium{% else %}text-gray-600 dark:text-gray-300{% endif %} hover:text-primary">
+                           class="block {% if not current_category %}text-primary font-medium{% else %}text-gray-600{% endif %} hover:text-primary">
                             All Categories
                         </a>
                         {% for category in categories %}
                             <a href="{% url 'products:category_detail' slug=category.slug %}" 
-                               class="block {% if current_category.slug == category.slug %}text-primary font-medium{% else %}text-gray-600 dark:text-gray-300{% endif %} hover:text-primary">
+                               class="block {% if current_category.slug == category.slug %}text-primary font-medium{% else %}text-gray-600{% endif %} hover:text-primary">
                                 {{ category.name }}
                             </a>
                         {% endfor %}
@@ -104,7 +104,7 @@
         <div class="flex-1 order-1 lg:order-2">
             <!-- Sort & Results Count -->
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4 md:mb-6">
-                <p class="text-sm md:text-base text-gray-600 dark:text-gray-400">Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ page_obj.paginator.count }} products</p>
+                <p class="text-sm md:text-base text-gray-600">Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ page_obj.paginator.count }} products</p>
                 <form method="get" class="flex items-center gap-2 w-full sm:w-auto">
                     {% if current_category %}
                         <input type="hidden" name="category" value="{{ current_category.slug }}">
@@ -115,7 +115,7 @@
                     {% if request.GET.max_price %}
                         <input type="hidden" name="max_price" value="{{ request.GET.max_price }}">
                     {% endif %}
-                    <label class="text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">Sort by:</label>
+                    <label class="text-sm text-gray-600 whitespace-nowrap">Sort by:</label>
                     <select name="sort" onchange="this.form.submit()" 
                             class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-primary text-sm">
                         <option value="newest" {% if request.GET.sort == 'newest' or not request.GET.sort %}selected{% endif %}>Newest</option>
@@ -134,7 +134,7 @@
                     {% endfor %}
                 </div>
             {% else %}
-                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-md p-6 md:p-12 text-center">
+                <div class="bg-white rounded-xl shadow-md p-6 md:p-12 text-center">
                     <p class="text-gray-500">No products found.</p>
                 </div>
             {% endif %}

@@ -8,7 +8,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
-            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
@@ -20,96 +19,13 @@
             }
         }
     </script>
-    
-    <!-- Dark Mode CSS Variables -->
     <style>
-        :root {
-            /* Light Theme (Default) */
-            --bg-primary: #f9fafb;
-            --bg-secondary: #ffffff;
-            --bg-card: #ffffff;
-            --text-primary: #111827;
-            --text-secondary: #4b5563;
-            --text-muted: #9ca3af;
-            --border-color: #e5e7eb;
-            --shadow-color: rgba(0, 0, 0, 0.1);
-            --navbar-bg: #ffffff;
-            --footer-bg: #1f2937;
-        }
-
-        [data-theme="dark"] {
-            --bg-primary: #0f172a;
-            --bg-secondary: #1e293b;
-            --bg-card: #1e293b;
-            --text-primary: #f1f5f9;
-            --text-secondary: #94a3b8;
-            --text-muted: #64748b;
-            --border-color: #334155;
-            --shadow-color: rgba(0, 0, 0, 0.3);
-            --navbar-bg: #1e293b;
-            --footer-bg: #0f172a;
-        }
-
-        /* Apply CSS Variables */
         body {
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            transition: background-color 0.3s ease, color 0.3s ease;
+            background-color: #f9fafb;
+            color: #111827;
         }
+    </style>
 
-        /* Dark mode overrides */
-        .dark .bg-white { background-color: var(--bg-card) !important; }
-        .dark .bg-gray-50 { background-color: var(--bg-primary) !important; }
-        .dark .bg-gray-100 { background-color: var(--bg-secondary) !important; }
-        .dark .text-gray-900 { color: var(--text-primary) !important; }
-        .dark .text-gray-800 { color: var(--text-primary) !important; }
-        .dark .text-gray-700 { color: var(--text-secondary) !important; }
-        .dark .text-gray-600 { color: var(--text-secondary) !important; }
-        .dark .text-gray-500 { color: var(--text-muted) !important; }
-        .dark .text-gray-400 { color: var(--text-muted) !important; }
-        .dark .border-gray-200 { border-color: var(--border-color) !important; }
-        .dark .border-gray-300 { border-color: var(--border-color) !important; }
-        .dark .shadow-md { box-shadow: 0 4px 6px var(--shadow-color) !important; }
-        .dark .shadow-lg { box-shadow: 0 10px 15px var(--shadow-color) !important; }
-
-        /* Form inputs dark mode */
-        .dark input[type="text"],
-        .dark input[type="email"],
-        .dark input[type="password"],
-        .dark input[type="number"],
-        .dark textarea,
-        .dark select {
-            background-color: var(--bg-secondary);
-            border-color: var(--border-color);
-            color: var(--text-primary);
-        }
-
-        .dark input::placeholder,
-        .dark textarea::placeholder {
-            color: var(--text-muted);
-        }
-
-        /* Smooth theme transition */
-        * {
-            transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            * {
-                transition: none !important;
-            }
-        }
-
-        /* Theme toggle button styles */
-        .theme-toggle {
-            cursor: pointer;
-            padding: 0.5rem;
-            border-radius: 0.375rem;
-            transition: background-color 0.2s ease;
-        }
-        .theme-toggle:hover {
-            background-color: var(--bg-secondary);
-        }
     </style>
     
     <!-- Responsive CSS -->
@@ -562,7 +478,7 @@
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col">
     <!-- Sticky Navbar -->
-    <nav class="sticky top-0 z-50 bg-white dark:bg-slate-800 shadow-md">
+    <nav class="sticky top-0 z-50 bg-whitebg-slate-800 shadow-md">
         <div class="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
             <div class="flex flex-wrap justify-between items-center h-16 gap-2">
                 
@@ -577,7 +493,7 @@
                 <div class="hidden sm:block flex-1 max-w-lg mx-2 md:mx-4 min-w-0">
                     <form action="{% url 'products:search' %}" method="get" class="flex">
                         <input type="text" name="q" placeholder="Search products..." 
-                               class="w-full px-3 py-2 text-sm md:text-base border border-gray-300 dark:border-gray-600 dark:bg-slate-700 dark:text-white rounded-l-lg focus:outline-none focus:border-primary">
+                               class="w-full px-3 py-2 text-sm md:text-base border border-gray-300border-gray-600bg-slate-700text-white rounded-l-lg focus:outline-none focus:border-primary">
                         <button type="submit" class="bg-primary text-white px-3 py-2 md:px-6 rounded-r-lg hover:bg-primary-dark transition">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -587,24 +503,16 @@
                 </div>
                 
                 <!-- Mobile Search Button (visible on extra small screens only) -->
-                <a href="{% url 'products:search' %}" class="sm:hidden p-2 text-gray-600 dark:text-gray-300 hover:text-primary transition">
+                <a href="{% url 'products:search' %}" class="sm:hidden p-2 text-gray-600text-gray-300 hover:text-primary transition">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                 </a>
                 
-                <!-- Theme Toggle, Cart, Wishlist, Profile -->
+                <!-- Cart, Wishlist, Profile -->
                 <div class="flex items-center">
-                    <button id="theme-toggle" class="theme-toggle inline-flex items-center justify-center p-2 text-gray-600 dark:text-gray-300 hover:text-primary transition" title="Toggle theme">
-                        <svg id="sun-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                        </svg>
-                        <svg id="moon-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                        </svg>
-                    </button>
                     
-                    <a href="{% url 'orders:cart' %}" class="inline-flex items-center justify-center relative p-2 text-gray-600 dark:text-gray-300 hover:text-primary transition">
+                    <a href="{% url 'orders:cart' %}" class="inline-flex items-center justify-center relative p-2 text-gray-600text-gray-300 hover:text-primary transition">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
@@ -616,7 +524,7 @@
                     </a>
                     
                     {% if user.is_authenticated %}
-                        <a href="{% url 'users:wishlist' %}" class="inline-flex items-center justify-center p-2 text-gray-600 dark:text-gray-300 hover:text-primary transition">
+                        <a href="{% url 'users:wishlist' %}" class="inline-flex items-center justify-center p-2 text-gray-600text-gray-300 hover:text-primary transition">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                             </svg>
@@ -631,12 +539,12 @@
                                     </div>
                                 {% endif %}
                             </button>
-                            <div id="user-menu" class="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-lg hidden z-50">
-                                <a href="{% url 'users:profile' %}" class="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700">Profile</a>
-                                <a href="{% url 'users:orders' %}" class="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700">Orders</a>
-                                <a href="{% url 'users:wishlist' %}" class="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700">Wishlist</a>
-                                <hr class="my-1 border-gray-200 dark:border-gray-600">
-                                <a href="{% url 'users:logout' %}" class="block px-4 py-2 text-red-600 hover:bg-gray-100 dark:hover:bg-slate-700">Logout</a>
+                            <div id="user-menu" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg hidden z-50">
+                                <a href="{% url 'users:profile' %}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Profile</a>
+                                <a href="{% url 'users:orders' %}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Orders</a>
+                                <a href="{% url 'users:wishlist' %}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Wishlist</a>
+                                <hr class="my-1 border-gray-200">
+                                <a href="{% url 'users:logout' %}" class="block px-4 py-2 text-red-600 hover:bg-gray-100">Logout</a>
                             </div>
                         </div>
                         <script>
@@ -653,7 +561,7 @@
                             });
                         </script>
                     {% else %}
-                        <a href="{% url 'users:login' %}" class="inline-flex items-center p-2 text-gray-600 dark:text-gray-300 hover:text-primary transition">Login</a>
+                        <a href="{% url 'users:login' %}" class="inline-flex items-center p-2 text-gray-600 hover:text-primary transition">Login</a>
                         <a href="{% url 'users:register' %}" class="inline-flex items-center bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition">Register</a>
                     {% endif %}
                 </div>
@@ -845,57 +753,7 @@
             });
         });
 
-        // Dark Mode Toggle
-        (function() {
-            const themeToggle = document.getElementById('theme-toggle');
-            const sunIcon = document.getElementById('sun-icon');
-            const moonIcon = document.getElementById('moon-icon');
-            const html = document.documentElement;
-
-            // Check for saved theme preference or use system preference
-            function getPreferredTheme() {
-                const savedTheme = localStorage.getItem('theme');
-                if (savedTheme) {
-                    return savedTheme;
-                }
-                return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-            }
-
-            // Apply theme
-            function applyTheme(theme) {
-                if (theme === 'dark') {
-                    html.setAttribute('data-theme', 'dark');
-                    html.classList.add('dark');
-                    sunIcon.classList.remove('hidden');
-                    moonIcon.classList.add('hidden');
-                } else {
-                    html.setAttribute('data-theme', 'light');
-                    html.classList.remove('dark');
-                    sunIcon.classList.add('hidden');
-                    moonIcon.classList.remove('hidden');
-                }
-                localStorage.setItem('theme', theme);
-            }
-
-            // Initialize theme on page load
-            applyTheme(getPreferredTheme());
-
-            // Toggle theme on button click
-            themeToggle.addEventListener('click', function() {
-                const currentTheme = localStorage.getItem('theme') || 
-                    (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-                applyTheme(newTheme);
-            });
-
-            // Listen for system theme changes
-            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
-                if (!localStorage.getItem('theme')) {
-                    applyTheme(e.matches ? 'dark' : 'light');
-                }
-            });
-        })();
-    </script>
+        // Initialize tooltips
 
     {% block extra_js %}{% endblock %}
 </body>
