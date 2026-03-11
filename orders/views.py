@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
@@ -308,64 +309,73 @@ def verify_payment(request):
     """
     Verify the Razorpay payment signature after successful payment.
     This is called by the Razorpay checkout popup after payment completion.
+    Returns JSON response for client-side redirect handling.
     """
     try:
-        # Get payment response data from POST
         razorpay_order_id = request.POST.get('razorpay_order_id')
         razorpay_payment_id = request.POST.get('razorpay_payment_id')
         razorpay_signature = request.POST.get('razorpay_signature')
         
-        # Find the payment record
+        if not all([razorpay_order_id, razorpay_payment_id, razorpay_signature]):
+            return JsonResponse({
+                'success': False,
+                'message': 'Missing payment parameters'
+            }, status=400)
+        
         payment = Payment.objects.get(razorpay_order_id=razorpay_order_id)
         
-        # Verify the signature
         params_dict = {
             'razorpay_order_id': razorpay_order_id,
             'razorpay_payment_id': razorpay_payment_id,
             'razorpay_signature': razorpay_signature
         }
         
-        # Verify payment signature using Razorpay utility
         razorpay_client.utility.verify_payment_signature(params_dict)
         
-        # Update payment status to SUCCESS
         payment.razorpay_payment_id = razorpay_payment_id
         payment.razorpay_signature = razorpay_signature
         payment.status = 'SUCCESS'
         payment.save()
         
-        # Update order status
         order = payment.order
         order.payment_status = 'PAID'
         order.status = 'CONFIRMED'
         order.save()
         
-        # Clear the cart after successful payment
         clear_cart(request)
         
-        # Redirect to success page
-        return redirect('orders:payment_success', order_id=order.id)
-        
-    except razorpay.errors.SignatureVerificationError:
-        # Payment signature verification failed
-        payment = Payment.objects.get(razorpay_order_id=razorpay_order_id)
-        payment.status = 'FAILED'
-        payment.save()
-        
-        order = payment.order
-        order.payment_status = 'FAILED'
-        order.save()
-        
-        messages.error(request, 'Payment verification failed. Please try again.')
-        return redirect('orders:checkout')
+        return JsonResponse({
+            'success': True,
+            'redirect_url': reverse('orders:payment_success', kwargs={'order_id': order.id})
+        })
         
     except Payment.DoesNotExist:
-        messages.error(request, 'Payment record not found.')
-        return redirect('orders:checkout')
+        return JsonResponse({
+            'success': False,
+            'message': 'Payment record not found'
+        }, status=404)
+        
+    except razorpay.errors.SignatureVerificationError:
+        if 'razorpay_order_id' in locals():
+            try:
+                payment = Payment.objects.get(razorpay_order_id=razorpay_order_id)
+                payment.status = 'FAILED'
+                payment.save()
+                payment.order.payment_status = 'FAILED'
+                payment.order.save()
+            except Payment.DoesNotExist:
+                pass
+        
+        return JsonResponse({
+            'success': False,
+            'message': 'Payment verification failed - invalid signature'
+        }, status=400)
         
     except Exception as e:
-        messages.error(request, f'Payment error: {str(e)}')
-        return redirect('orders:checkout')
+        return JsonResponse({
+            'success': False,
+            'message': f'Payment error: {str(e)}'
+        }, status=500)
 
 
 @login_required

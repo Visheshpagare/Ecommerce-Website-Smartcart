@@ -44,6 +44,23 @@
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <script>
+    // Get CSRF token
+    function getCsrfToken() {
+        var name = 'csrftoken';
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
     // Razorpay payment options
     var options = {
         "key": "{{ razorpay_merchant_key }}",
@@ -60,8 +77,6 @@
             "color": "#6366f1"
         },
         "handler": function (response) {
-            // This handler is called when payment is successful
-            // Send payment details to backend for verification
             var formData = new FormData();
             formData.append('razorpay_payment_id', response.razorpay_payment_id);
             formData.append('razorpay_order_id', response.razorpay_order_id);
@@ -74,19 +89,31 @@
                 },
                 body: formData
             })
-            .then(function(res) { return res.json(); })
+            .then(function(res) {
+                if (!res.ok) {
+                    throw new Error("Server error: " + res.status);
+                }
+                return res.json();
+            })
             .then(function(data) {
                 if (data.success) {
-                    // Redirect to success page
+                    if (window.rzp1) {
+                        window.rzp1.close();
+                    }
                     window.location.href = data.redirect_url;
                 } else {
-                    // Redirect to failure page
+                    if (window.rzp1) {
+                        window.rzp1.close();
+                    }
                     alert('Payment verification failed: ' + data.message);
                     window.location.href = '{% url "orders:payment_failed" %}';
                 }
             })
             .catch(function(error) {
                 console.error('Error:', error);
+                if (window.rzp1) {
+                    window.rzp1.close();
+                }
                 alert('Payment verification failed. Please contact support.');
                 window.location.href = '{% url "orders:payment_failed" %}';
             });
@@ -95,6 +122,7 @@
 
     // Initialize Razorpay checkout
     var rzp1 = new Razorpay(options);
+    window.rzp1 = rzp1;
 
     // Event listener for payment button
     document.getElementById('pay-btn').addEventListener('click', function(e) {
@@ -107,21 +135,5 @@
         alert('Payment failed: ' + response.error.description);
         window.location.href = '{% url "orders:payment_failed" %}';
     });
-
-    function getCsrfToken() {
-        var name = 'csrftoken';
-        var cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            var cookies = document.cookie.split(';');
-            for (var i = 0; i < cookies.length; i++) {
-                var cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
 </script>
 {% endblock %}

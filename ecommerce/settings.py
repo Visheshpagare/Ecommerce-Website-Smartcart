@@ -131,6 +131,6 @@ AUTH_USER_MODEL = 'users.CustomUser'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Razorpay Payment Gateway Configuration
-RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID')
-RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_KEY_SECRET')
+RAZORPAY_KEY_ID = os.getenv('rzp_live_SPquZCai59487O')
+RAZORPAY_KEY_SECRET = os.getenv('J6ZOLsgXcAmuOsRQ5xCVr1TS')
 RAZORPAY_CURRENCY = 'INR'
